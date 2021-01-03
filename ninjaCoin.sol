@@ -21,7 +21,7 @@ contract BasicToken is Ownable, ERC20 {
 
   uint internal _totalSupply;
   mapping(address => uint) internal _balances;
-  mapping(address => mapping(address => uint)) internal _allowed;
+  mapping(address => mapping (address => uint)) internal _allowed;
 
 
   function totalSupply() public override view returns (uint) {
@@ -44,6 +44,7 @@ contract BasicToken is Ownable, ERC20 {
   }
 
   function approve(address spender, uint tokens) public override returns (bool success) {
+    require (tokens == 0 && _allowed[msg.sender][spender] == 0);
     _allowed[msg.sender][spender] = tokens;
 
     emit Approval(msg.sender, spender, tokens);
@@ -60,9 +61,12 @@ contract BasicToken is Ownable, ERC20 {
     require(_allowed[from][msg.sender] >= tokens);
     require(_balances[from] >= tokens);
     require(to != address(0));
+
+    uint _allowance = _allowed[from][msg.sender];
+
     _balances[from] = _balances[from].sub(tokens);
     _balances[to] = _balances[to].add(tokens);
-    _allowed[from][msg.sender] = _allowed[from][msg.sender].sub(tokens);
+    _allowed[from][msg.sender] = _allowance.sub(tokens);
 
     emit Transfer(from, to, tokens);
 
